@@ -63,7 +63,7 @@ function Stars({ rating, size = 24, interactive = false, onRate }) {
 // QR DISPLAY
 // ============================================================
 function QRDisplay({ value, size = 160 }) {
-  const url = encodeURIComponent("https://eval-system-ten.vercel.app");
+  const url = encodeURIComponent("https://eval-system-ten.vercel.app/?rate=1");
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${url}&color=111827&bgcolor=ffffff&margin=10`;
   return (
     <img src={qrUrl} width={size} height={size} style={{ borderRadius:8 }} alt="QR Code" />
@@ -698,6 +698,8 @@ function Dashboard({ reviews, employees, shifts }) {
 // MAIN APP
 // ============================================================
 export default function App() {
+  const isRatingPage = typeof window !== "undefined" && window.location.search.includes("rate=1");
+
   const [loggedIn, setLoggedIn]   = useState(()=>loadData("eval_session",false));
   const [employees, setEmployees] = useState(()=>loadData("eval_employees",[]));
   const [shifts, setShifts]       = useState(()=>loadData("eval_shifts",[]));
@@ -717,6 +719,13 @@ export default function App() {
   const addShift    = s  => setShifts(p=>[...p,{...s,id:Date.now()}]);
   const delShift    = id => setShifts(p=>p.filter(s=>s.id!==id));
   const logout      = () => { setLoggedIn(false); setActiveTab("dashboard"); };
+
+  // صفحة التقييم مباشرة عند مسح QR
+  if (isRatingPage) return (
+    <RatingPage shifts={shifts} employees={employees}
+      onSubmit={d=>{ addReview(d); }}
+      onBack={()=>{ window.location.href = window.location.origin + "/?rate=1"; }} />
+  );
 
   if (!loggedIn) return <LoginPage onLogin={()=>setLoggedIn(true)} />;
 
