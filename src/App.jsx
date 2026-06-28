@@ -63,28 +63,10 @@ function Stars({ rating, size = 24, interactive = false, onRate }) {
 // QR DISPLAY
 // ============================================================
 function QRDisplay({ value, size = 160 }) {
-  const hash = value.split("").reduce((a,c) => ((a<<5)-a+c.charCodeAt(0))|0, 0);
-  const cells = 21;
-  const grid = [];
-  const finder = (row, col) => {
-    const inC = (r,c,or,oc) => { const dr=r-or,dc=c-oc; return dr>=0&&dr<7&&dc>=0&&dc<7&&((dr===0||dr===6||dc===0||dc===6)||(dr>=2&&dr<=4&&dc>=2&&dc<=4)); };
-    return inC(row,col,0,0)||inC(row,col,0,cells-7)||inC(row,col,cells-7,0);
-  };
-  for (let r=0;r<cells;r++) {
-    grid[r]=[];
-    for (let c=0;c<cells;c++) {
-      if (finder(r,c)) { grid[r][c]=1; continue; }
-      if ((r===6||c===6)&&r>=6&&r<=cells-7&&c>=6&&c<=cells-7) { grid[r][c]=(r+c)%2===0?1:0; continue; }
-      const seed=(hash^(r*31+c*17))*1664525+1013904223;
-      grid[r][c]=((seed>>7)&1)^((r*c)%3===0?1:0);
-    }
-  }
-  const cell = size/cells;
+  const url = encodeURIComponent("https://eval-system-ten.vercel.app");
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${url}&color=111827&bgcolor=ffffff&margin=10`;
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ borderRadius:8 }}>
-      <rect width={size} height={size} fill="white"/>
-      {grid.map((row,r)=>row.map((val,c)=>val?<rect key={`${r}-${c}`} x={c*cell} y={r*cell} width={cell} height={cell} fill="#111827"/>:null))}
-    </svg>
+    <img src={qrUrl} width={size} height={size} style={{ borderRadius:8 }} alt="QR Code" />
   );
 }
 
